@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.view.MotionEvent;
 import android.view.View;
 
 public class GameView extends View {
@@ -28,6 +29,7 @@ public class GameView extends View {
     int trainY = 728;
     int speed = 10;
     int cell = station.length-1; //進むマス
+    boolean start = false;
 
     // コンストラクタ
     public GameView(Context context) {
@@ -62,7 +64,7 @@ public class GameView extends View {
         int width = canvas.getWidth();
 
         int distance = cell * (width/4)-20;
-        if(offset<distance)
+        if(offset<distance && start)
             offset+=speed;//移動処理
 
         //背景描画処理
@@ -94,5 +96,23 @@ public class GameView extends View {
         else
             trainY += 5;*/
         canvas.drawBitmap(train,20,trainY,null); //電車描画
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+
+        switch(event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                break;
+            case MotionEvent.ACTION_UP:
+                if(!start){
+                    start = true;
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                break;
+        }
+
+        return true;
     }
 }
