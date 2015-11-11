@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         int recent_cell = 5;
-        int cell = 15;
+        int cell = 35;
 
         // 「GameView」オブジェクト(ビュー)の作成
         view = new GameView(this,recent_cell,cell);

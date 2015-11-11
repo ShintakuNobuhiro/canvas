@@ -16,7 +16,8 @@ import android.view.View;
 public class GameView extends View {
 
     //駅名
-    String station[] = {"新青森","七戸十和田","八戸","いわて沼宮内","盛岡","新花巻","北上","水沢江刺","一ノ関","くりこま高原","古川","仙台","白石蔵王","福島","郡山","新白河","那須塩原","宇都宮","小山","大宮","上野","東京"};
+    String station[] = {"新青森","七戸十和田","八戸","二戸","いわて沼宮内","盛岡","新花巻","北上","水沢江刺","一ノ関","くりこま高原","古川","仙台","白石蔵王","福島","郡山","新白河","那須塩原","宇都宮","小山","大宮","上野","東京"};
+    String badgeName[] ={"ねぶた","十和田市現代美術館","イカ","さくらんぼ","岩手銀河鉄道","冷麺","宮沢賢治","ごしょ芋","南部鉄器","金色堂","いわな","ササニシキ","牛タン","樹氷","桃","ままどおる","白河そば","牛","餃子","遊園地","鉄道博物館","スカイツリー","東京ばな奈"};
 
     // 背景画像を格納する変数を宣言
     private Bitmap bgImage,bgImageEnd;
@@ -25,10 +26,13 @@ public class GameView extends View {
     int frameIndex = 0;
 
     private Bitmap train,board;
+    private Bitmap badge[] = new Bitmap[station.length];
+    private Bitmap badgeOriginal[] = new Bitmap[station.length];
     private Paint paint = new Paint();
 
     int offset=0;
     int trainY = 728;
+    int badgeSize = 100;
     int speed = 10;
     int recent_cell; //前回マス
     int cell; //現在マス
@@ -40,8 +44,14 @@ public class GameView extends View {
     // コンストラクタ
     public GameView(Context context,int rc,int c) {
         super(context);
-        recent_cell = rc;
-        cell = c;
+        if(rc>=station.length-1)
+            recent_cell = station.length-1;
+        else
+            recent_cell = rc;
+        if(c>=station.length-1)
+            cell = station.length-1;
+        else
+            cell = c;
 
         // リソースオブジェクトを作成
         Resources res = this.getContext().getResources();
@@ -59,6 +69,36 @@ public class GameView extends View {
         //看板
         board = BitmapFactory.decodeResource(res, R.drawable.station_signboard);
         board = Bitmap.createScaledBitmap(board, 300, 250, true);
+
+        for (int i = 1; i <= station.length; i++) {
+            int resourceId;
+            if (i < 10)
+                resourceId = getContext().getResources().getIdentifier("station0" + i, "drawable", getContext().getPackageName());
+            else
+                resourceId = getContext().getResources().getIdentifier("station" + i, "drawable", getContext().getPackageName());
+            if (resourceId != 0) {
+                badge[i - 1] = BitmapFactory.decodeResource(res, resourceId);
+                badge[i - 1] = Bitmap.createScaledBitmap(badge[i - 1], badgeSize, badgeSize, true);
+                Log.d("badge", "set");
+            } else {
+                Log.e("resource", "error");
+            }
+        }
+        int badgeOrgSize = 250;
+        for (int i = 1; i <= station.length; i++) {
+            int resourceId;
+            if (i < 10)
+                resourceId = getContext().getResources().getIdentifier("station0" + i +"_or", "drawable", getContext().getPackageName());
+            else
+                resourceId = getContext().getResources().getIdentifier("station" + i +"_or", "drawable", getContext().getPackageName());
+            if (resourceId != 0) {
+                badgeOriginal[i - 1] = BitmapFactory.decodeResource(res, resourceId);
+                badgeOriginal[i - 1] = Bitmap.createScaledBitmap(badgeOriginal[i - 1], badgeOrgSize, badgeOrgSize, true);
+                Log.d("badge", "set");
+            } else {
+                Log.e("resource", "error"+String.valueOf(i));
+            }
+        }
     }
 
     // スパークラス(継承元)の「onDraw」メソッドをオーバーライドする
@@ -98,19 +138,27 @@ public class GameView extends View {
             paint.setColor(Color.argb(255, 0, 0, 0));
             int pos = (width/imageCell)*i-offset;
             canvas.drawBitmap(board, pos - 30, 800, paint);
+            paint.setAntiAlias(true);
             canvas.drawText(station[i], pos, 880, paint);
+            paint.setAntiAlias(false);
 
             //吹き出し
-            if(i<recent_cell)
+            if(i==recent_cell)
+                paint.setColor(Color.argb(190,0,0,240));
+            else if(i<recent_cell)
                 paint.setColor(Color.argb(190, 255, 255, 255));
-            else if(i<=cell)
+            else if(i<cell)
                 paint.setColor(Color.argb(190, 255, 255, 0));
+            else if(i==cell)
+                paint.setColor(Color.argb(190,240,0,0));
             else
                 paint.setColor(Color.argb(190, 255, 255, 255));
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            RectF balloon = new RectF(0, 0, 300, 200);
+            RectF balloon = new RectF(0, 0, 300, 280);
             balloon.offset(pos-15, 390);
             canvas.drawRoundRect(balloon, 10, 10, paint);
+            paint.setColor(Color.argb(255,0,0,0));
+            canvas.drawBitmap(badgeOriginal[i],pos+10,380,paint);
         }
         //電車振動
         int trainFrame = 15;
@@ -122,12 +170,71 @@ public class GameView extends View {
         }
         canvas.drawBitmap(train,20,trainY,null); //電車描画
 
+        //バッジ描画
+        int columnX = -badgeSize;
+        int columnY = 0;
+        for(int i=0;i<badge.length;i++){
+            if (badge[i] != null) {
+                if(columnX<getWidth()-2*badgeSize) {
+                    columnX += badgeSize;
+                } else {
+                    columnY += badgeSize;
+                    columnX = 0;
+                }
+                int dis = i * (width/imageCell)-50;
+                if(i<=recent_cell)
+                    canvas.drawBitmap(badge[i], columnX, columnY, null);
+                else if(i<=cell && offset>dis)
+                    canvas.drawBitmap(badge[i], columnX, columnY, null);
+            } else {
+                Log.e("null", String.valueOf(i) + "," + String.valueOf(station.length));
+            }
+        }
+
+        if(!start && cell == station.length-1 && offset >= distance){
+            paint.setColor(Color.argb(190, 255, 255, 255));
+            canvas.drawRect(500, 500, getWidth() - 100, getHeight() - 100, paint);
+            paint.setColor(Color.argb(255, 0, 0, 0));
+            paint.setTextSize(70);
+            paint.setAntiAlias(true);
+            canvas.drawText("よくがんばりました！ゴールしたよ！", 580, 700, paint);
+            canvas.drawText("これからもがんばろう！",580,800,paint);
+            paint.setAntiAlias(false);
+        }
+
+        RectF log = new RectF(0, 0, 1300, 200);
+        log.offset(width - 1300, badgeSize);
+        paint.setColor(Color.argb(190, 255, 255, 255));
+        canvas.drawRect(log, paint);
+        paint.setColor(Color.argb(190, 0, 0, 0));
+        paint.setTextSize(45);
+        paint.setAntiAlias(true);
+        canvas.drawText("今回ゲットしたバッジ：",width-1300, (float) (1.5*badgeSize),paint);
+        String tmp = null;
+        for(int i=0;i<station.length;i++){
+            int dis = i * (width/imageCell)-50;
+            if(i>recent_cell && i<cell && offset>dis) {
+                if (tmp == null)
+                    tmp = badgeName[i]+",";
+                else
+                    tmp = tmp + badgeName[i] + ",";
+            }
+            else if(i==cell && offset>dis)
+                tmp = tmp+badgeName[i];
+        }
+        if(tmp != null)
+            canvas.drawText(tmp,width-1300, (float) (2.5*badgeSize),paint);
+        paint.setAntiAlias(false);
+
         RectF back = new RectF(0, 0, 300, 100);
-        back.offset(0,240);
+        back.offset(0, 240);
         paint.setColor(Color.parseColor("#2196F3"));
         canvas.drawRect(back, paint);
         paint.setColor(Color.argb(255, 255, 255, 255));
-        canvas.drawText("←もどる",50,300,paint);
+        paint.setTextSize(45);
+        paint.setAntiAlias(true);
+        canvas.drawText("もどる",65,310,paint);
+        paint.setAntiAlias(false);
     }
 
     @Override
@@ -153,4 +260,7 @@ public class GameView extends View {
 
         return true;
     }
+
+
+
 }
