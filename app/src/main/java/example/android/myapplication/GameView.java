@@ -31,7 +31,7 @@ public class GameView extends View {
     private Paint paint = new Paint();
 
     int offset=0;
-    int trainY = 728;
+    int trainY = 715;
     int badgeSize = 100;
     int speed = 10;
     int recent_cell; //前回マス
@@ -65,7 +65,7 @@ public class GameView extends View {
         bgImageEnd = Bitmap.createScaledBitmap(bgImageEnd, 1920, 1056, true);
         //電車
         train = BitmapFactory.decodeResource(res, R.drawable.hayabusa);
-        train = Bitmap.createScaledBitmap(train, 180, 90, true);
+        train = Bitmap.createScaledBitmap(train, 210, 105, true);
         //看板
         board = BitmapFactory.decodeResource(res, R.drawable.station_signboard);
         board = Bitmap.createScaledBitmap(board, 300, 250, true);
@@ -209,7 +209,10 @@ public class GameView extends View {
         paint.setColor(Color.argb(190, 0, 0, 0));
         paint.setTextSize(45);
         paint.setAntiAlias(true);
-        canvas.drawText("今回ゲットしたバッジ：",width-1300, (float) (1.5*badgeSize),paint);
+        if(!start && offset <= 0)
+            canvas.drawText("どれくらいすすんだかな？タップしてみよう！",width-1300, (float) (1.5*badgeSize),paint);
+        else
+            canvas.drawText("今回ゲットしたバッジ：",width-1300, (float) (1.5*badgeSize),paint);
         String tmp = null;
         for(int i=0;i<station.length;i++){
             int dis = i * (width/imageCell)-50;
@@ -222,8 +225,13 @@ public class GameView extends View {
             else if(i==cell && offset>dis)
                 tmp = tmp+badgeName[i];
         }
+        paint.setTextSize(40);
         if(tmp != null)
-            canvas.drawText(tmp,width-1300, (float) (2.5*badgeSize),paint);
+            canvas.drawText(tmp, width - 1300, 2*badgeSize,paint);
+        if(!start && offset >= distance) {
+            int remain = (station.length-1) - cell;
+            canvas.drawText("ゴールまで" + remain + "駅", width - 1300, (float) 2.5 * badgeSize, paint);
+        }
         paint.setAntiAlias(false);
 
         RectF back = new RectF(0, 0, 300, 100);
