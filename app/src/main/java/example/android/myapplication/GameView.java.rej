@@ -1,0 +1,28 @@
+diff a/app/src/main/java/example/android/myapplication/GameView.java b/app/src/main/java/example/android/myapplication/GameView.java	(rejected hunks)
+@@ -209,7 +209,10 @@
+         paint.setColor(Color.argb(190, 0, 0, 0));
+         paint.setTextSize(45);
+         paint.setAntiAlias(true);
+-        canvas.drawText("今回ゲットしたバッジ：",width-1300, (float) (1.5*badgeSize),paint);
++        if(!start && offset <= 0)
++            canvas.drawText("どれくらいすすんだかな？タップしてみよう！",width-1300, (float) (1.5*badgeSize),paint);
++        else
++            canvas.drawText("今回ゲットしたバッジ：",width-1300, (float) (1.5*badgeSize),paint);
+         String tmp = null;
+         for(int i=0;i<station.length;i++){
+             int dis = i * (width/imageCell)-50;
+@@ -222,8 +225,13 @@
+             else if(i==cell && offset>dis)
+                 tmp = tmp+badgeName[i];
+         }
++        paint.setTextSize(40);
+         if(tmp != null)
+-            canvas.drawText(tmp,width-1300, (float) (2.5*badgeSize),paint);
++            canvas.drawText(tmp, width - 1300, 2*badgeSize,paint);
++        if(!start && offset >= distance) {
++            int remain = (station.length-1) - cell;
++            canvas.drawText("ゴールまで" + remain + "駅", width - 1300, (float) 2.5 * badgeSize, paint);
++        }
+         paint.setAntiAlias(false);
+ 
+         RectF back = new RectF(0, 0, 300, 100);

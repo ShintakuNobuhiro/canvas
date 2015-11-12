@@ -13,7 +13,6 @@ public class MainActivity extends Activity {
     // view(「view」オブジェクトを格納する変数)の宣言
     private View view;
 
-    // 次の4行を追加する
     // ハンドラを作成
     private Handler handler = new Handler();
     // ビューの再描画間隔(ミリ秒)
@@ -23,8 +22,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        int recent_cell = 2;
-        int cell = 5;
+        int recent_cell = 23;
+        int cell = 25;
 
         // 「GameView」オブジェクト(ビュー)の作成
         view = new GameView(this,recent_cell,cell);
@@ -32,7 +31,6 @@ public class MainActivity extends Activity {
         // アクティビティにビューを組み込む
         setContentView(view);
 
-        // 次の13行を追加する
         // ビュー再描画タイマー
         // タイマーを作成
         Timer timer = new Timer(false);
