@@ -18,7 +18,8 @@ public class GameView extends View {
     //駅名
     String station[] = {"新青森","七戸十和田","八戸","二戸","いわて沼宮内","盛岡","新花巻","北上","水沢江刺","一ノ関","くりこま高原","古川","仙台","白石蔵王","福島","郡山","新白河","那須塩原","宇都宮","小山","大宮","上野","東京"};
     String station_read[] = {"しんあおもり","しちのへとわだ","はちのへ","にのへ","ぬまくない","もりおか","しんはなまき","きたかみ","みずさわえさし","いちのせき","こうげん","ふるかわ","せんだい","しらいしざおう","ふくしま","こおりやま","しんしらかわ","なすしおばら","うつのみや","おやま","おおみや","うえの","とうきょう"};
-    String badgeName[] ={"ねぶた","十和田市現代美術館","イカ","さくらんぼ","岩手銀河鉄道","冷麺","宮沢賢治","ごしょ芋","南部鉄器","金色堂","いわな","ササニシキ","牛タン","樹氷","桃","あかべこ","白河そば","牛","餃子","遊園地","鉄道博物館","スカイツリー","東京駅"};
+    String badgeName[] = {"ねぶた","十和田市現代美術館","イカ","さくらんぼ","岩手銀河鉄道","冷麺","宮沢賢治","ごしょ芋","南部鉄器","金色堂","いわな","ササニシキ","牛タン","樹氷","桃","赤べこ","白河そば","牛","餃子","遊園地","鉄道博物館","スカイツリー","東京駅"};
+    String badgeName_read[] = {"","とわだしげんだいびじゅつかん","","","いわてぎんがてつどう","れいめん","みやざわけんじ","いも","なんぶてっき","こんじきどう","","","ぎゅうたん","じゅひょう","もも","","しらかわそば","","ぎょうざ","ゆうえんち","てつどうはくぶつかん","","東京駅"};
 
     // 背景画像を格納する変数を宣言
     private Bitmap bgImageStart,bgImage,bgImageEnd;
@@ -45,7 +46,7 @@ public class GameView extends View {
     Context pContext;
 
     // コンストラクタ
-    public GameView(Context context,int rc,int c) {
+    public GameView(Context context, int rc, int c) {
         super(context);
         if(rc>=station.length-1)
             recent_cell = station.length-1;
@@ -101,7 +102,7 @@ public class GameView extends View {
                 badgeOriginal[i - 1] = Bitmap.createScaledBitmap(badgeOriginal[i - 1], badgeOrgSize, badgeOrgSize, true);
                 Log.d("badge", "set");
             } else {
-                Log.e("resource", "error"+String.valueOf(i));
+                Log.e("resource", "error" + String.valueOf(i));
             }
         }
     }
@@ -172,7 +173,7 @@ public class GameView extends View {
         String[] ar = tmp.split("");
         paint.setAntiAlias(true);
         paint.setTextSize(70);
-        paint.setColor(Color.argb(255,255,255,255));
+        paint.setColor(Color.argb(255, 255, 255, 255));
         for(int i=0;i<ar.length;i++) {
             canvas.drawText(ar[i],20,30+70*i,paint);
         }
@@ -207,6 +208,9 @@ public class GameView extends View {
         paint.setColor(Color.argb(255, 0, 0, 0));
         paint.setTextSize(48);
         paint.setAntiAlias(true);
+        if(offset == offset_int){
+            canvas.drawText("どこまですすめたかな？タップしてみよう！", 310, (float) (badgeSize * 2.5), paint);
+        }
         if (offset - offset_int < distance) {
             Log.d("test", String.valueOf(frameIndex - stopFrame));
             if (start) {
@@ -238,7 +242,10 @@ public class GameView extends View {
                         }
                         canvas.drawBitmap(badgeOriginal[t], 0, badgeSize * 2, paint);
                         canvas.drawText(name, 310, (float) (badgeSize * 2.5), paint);
-                        canvas.drawText(badgeName[t] + "をゲットした！", 310, badgeSize * 3, paint);
+                        if(badgeName_read[t] == "")
+                            canvas.drawText(badgeName[t] + "をゲットした！", 310, badgeSize * 3, paint);
+                        else
+                            canvas.drawText(badgeName[t]+ "(" + badgeName_read[t] + ")をゲットした！",310, badgeSize *3, paint);
                     }
                 } else {
                     offset += speed;
@@ -256,12 +263,12 @@ public class GameView extends View {
             paint.setColor(Color.parseColor("#000000"));
             canvas.drawText(station[cell] + "(" + station_read[cell] + ")" + "えきにいるよ！", 310, (float) (badgeSize * 2.5), paint);
             canvas.drawText("つぎのえきまでもう少しだ！",310,badgeSize*3,paint);
-            canvas.drawText("東京えきまで"+String.valueOf(station.length-cell)+"えき！つぎもがんばろう！",310,(float)(badgeSize*3.5),paint);
-        }
-        else {
+            paint.setColor(Color.argb(255, 255, 0, 0));
+            canvas.drawText("東京えきまで"+ String.valueOf(station.length - cell)+"えき！つぎもがんばろう！",310,(float)(badgeSize*3.5),paint);
+        } else {
             start = false;
             rect = new RectF(0, 0, 200, 200);
-            rect.offset(920,-360);
+            rect.offset(920, -360);
             canvas.save();
             canvas.rotate(45);
             paint.setColor(Color.parseColor("#BBDEFB"));
@@ -270,13 +277,16 @@ public class GameView extends View {
             paint.setColor(Color.parseColor("#000000"));
             canvas.drawBitmap(badgeOriginal[cell], 0, badgeSize * 2, paint);
             canvas.drawText(station[cell] + "(" + station_read[cell] + ")" + "えきについた！", 310, (float) (badgeSize * 2.5), paint);
-            canvas.drawText(badgeName[cell]+"をゲットした！",310,badgeSize*3,paint);
+            if(badgeName_read[cell] == "")
+                canvas.drawText(badgeName[cell] + "をゲットした！", 310, badgeSize * 3, paint);
+            else
+                canvas.drawText(badgeName[cell]+ "(" + badgeName_read[cell] + ")をゲットした！",310, badgeSize * 3, paint);
             paint.setColor(Color.argb(255, 255, 0, 0));
             if(frameIndex-stopFrame >= 40)
                 if(cell == station.length-1)
                     canvas.drawText("東京えきにとうちゃく！おめでとう",310,(float)(badgeSize*3.5),paint);
                 else
-                    canvas.drawText("東京えきまで"+String.valueOf(station.length-cell)+"えき！つぎもがんばろう！",310,(float)(badgeSize*3.5),paint);
+                    canvas.drawText("東京えきまで"+ String.valueOf(station.length - cell)+"えき！つぎもがんばろう！",310,(float)(badgeSize*3.5),paint);
         }
         paint.setAntiAlias(false);
 
@@ -309,12 +319,12 @@ public class GameView extends View {
                 break;
             case MotionEvent.ACTION_UP:
                 if(event.getX() >= 0 && event.getX() <= 350 && event.getY() >= getHeight()-150 && event.getY() <= getHeight()) {
-                    Log.d("back","touched!");
+                    Log.d("back", "touched!");
                     ((Activity)pContext).finish(); //Context経由でActivityを終了
                 }
                 else if(!start) {
                     start = true;
-                    Log.d("start","touched!");
+                    Log.d("start", "touched!");
                     startFrame = frameIndex;
                 }
                 break;
