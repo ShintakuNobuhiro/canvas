@@ -42,7 +42,6 @@ public class GameView extends View {
     int cell; //現在マス
     int imageCell = 2; //画像1枚のマス数
     boolean start = false;
-    boolean back = false;
     Context pContext;
 
     // コンストラクタ
@@ -90,7 +89,7 @@ public class GameView extends View {
                 Log.e("resource", "error");
             }
         }
-        int badgeOrgSize = 250;
+        int badgeOrgSize = badgeSize*2;
         for (int i = 1; i <= station.length; i++) {
             int resourceId;
             if (i < 10)
@@ -120,26 +119,7 @@ public class GameView extends View {
         int width = canvas.getWidth();
         int distance = cell * (width / imageCell);
 
-        if (offset - offset_int < distance) {
-            Log.d("test", String.valueOf(frameIndex - stopFrame));
-            if (start) {
-                //recent_cell～cellは各駅停車しながら移動
-                if (offset - offset_int >= recent_cell * (width / imageCell)) {
-                    if (frameIndex - startFrame <= width / imageCell / speed) {
-                        offset += speed;
-                        stopFrame = frameIndex;
-                    }
-                    if (frameIndex - stopFrame >= 300) {
-                        start = true;
-                        startFrame = frameIndex;
-                    }
-                } else {
-                    offset += speed;
-                    stopFrame = frameIndex;
-                }
-            }
-        } else
-            start = false;
+
 
 
         //始点背景処理
@@ -157,10 +137,10 @@ public class GameView extends View {
         }
 
         //各駅に付随するものの表示
-        for(int i=0;i<station.length;i++){
+        for(int i=0;i<station.length;i++) {
             //看板・駅名
             paint.setColor(Color.argb(255, 0, 0, 0));
-            int pos = (width/imageCell)*i-offset;
+            int pos = (width / imageCell) * i - offset;
             canvas.drawBitmap(board, pos - 30, 800, paint);
             paint.setAntiAlias(true);
             paint.setTextSize(40);
@@ -168,25 +148,8 @@ public class GameView extends View {
             paint.setTextSize(32);
             canvas.drawText(station_read[i], pos, 900, paint);
             paint.setAntiAlias(false);
-
-            //吹き出し
-            if(i==recent_cell)
-                paint.setColor(Color.argb(190,0,0,240));
-            else if(i<recent_cell)
-                paint.setColor(Color.argb(190, 255, 255, 255));
-            else if(i<cell)
-                paint.setColor(Color.argb(190, 255, 255, 0));
-            else if(i==cell)
-                paint.setColor(Color.argb(190,240,0,0));
-            else
-                paint.setColor(Color.argb(190, 255, 255, 255));
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            RectF balloon = new RectF(0, 0, 300, 280);
-            balloon.offset(pos-15, 390);
-            canvas.drawRoundRect(balloon, 10, 10, paint);
-            paint.setColor(Color.argb(255,0,0,0));
-            canvas.drawBitmap(badgeOriginal[i],pos+10,380,paint);
         }
+
         //電車振動
         int trainFrame = 15;
         if(start) {
@@ -197,8 +160,30 @@ public class GameView extends View {
         }
         canvas.drawBitmap(train,20-offset_int,trainY,null); //電車描画
 
+        RectF log = new RectF(0, 0, width, 265);
+        log.offset(0, badgeSize*2);
+        paint.setColor(Color.argb(190, 255, 255, 255));
+        canvas.drawRect(log, paint);
+        paint.setColor(Color.argb(190, 0, 0, 0));
+        paint.setTextSize(45);
+        paint.setAntiAlias(true);
+        paint.setAntiAlias(false);
+
         //バッジ描画
-        int columnX = -badgeSize;
+        RectF rect = new RectF(0,0,getWidth(),badgeSize*2);
+        paint.setColor(Color.argb(255, 40, 40, 40));
+        canvas.drawRect(rect, paint);
+        String tmp = "バッジ";
+        String[] ar = tmp.split("");
+        paint.setAntiAlias(true);
+        paint.setTextSize(70);
+        paint.setColor(Color.argb(255,255,255,255));
+        for(int i=0;i<ar.length;i++) {
+            canvas.drawText(ar[i],20,30+70*i,paint);
+        }
+        paint.setAntiAlias(false);
+
+        int columnX = -badgeSize+100;
         int columnY = 0;
         for(int i=0;i<badge.length;i++){
             if (badge[i] != null) {
@@ -206,13 +191,9 @@ public class GameView extends View {
                     columnX += badgeSize;
                 } else {
                     columnY += badgeSize;
-                    columnX = 0;
+                    columnX = 100;
                 }
                 int dis = (i-1) * (width/imageCell)-offset_int;
-                RectF rect = new RectF(0,0,badgeSize,badgeSize);
-                paint.setColor(Color.argb(255, 40, 40, 40));
-                rect.offset(columnX, columnY);
-                canvas.drawRect(rect, paint);
 
                 if(i<=recent_cell)
                     canvas.drawBitmap(badge[i], columnX, columnY, null);
@@ -228,6 +209,53 @@ public class GameView extends View {
             }
         }
 
+        paint.setColor(Color.argb(255, 0, 0, 0));
+        paint.setTextSize(48);
+        paint.setAntiAlias(true);
+        if (offset - offset_int < distance) {
+            Log.d("test", String.valueOf(frameIndex - stopFrame));
+            if (start) {
+                //recent_cellの次～cellは各駅停車しながら移動
+                if (offset - offset_int > (recent_cell+1) * (width / imageCell)) {
+                    if (frameIndex - startFrame <= width / imageCell / speed) {
+                        offset += speed;
+                        stopFrame = frameIndex;
+                    }
+                    else if (frameIndex - stopFrame >= 300) {
+                        startFrame = frameIndex;
+                    }
+                    else {
+                        String name = "";
+                        int t = -1;
+                        for(int i=recent_cell;i<=cell;i++){
+                            if(offset-offset_int >= i*(width/imageCell) ) {
+                                name = station[i] + "(" + station_read[i] + ")" + "えきについた！";
+                                t = i;
+                            }
+                        }
+                        canvas.drawBitmap(badgeOriginal[t], 0, badgeSize * 2, paint);
+                        canvas.drawText(name,310, (float)(badgeSize*2.5),paint);
+                        canvas.drawText(badgeName[t]+"をゲットした！",310,badgeSize*3,paint);
+                    }
+                } else {
+                    offset += speed;
+                    stopFrame = frameIndex;
+                }
+            }
+        } else if(recent_cell == cell) {
+            canvas.drawText(station[cell] + "(" + station_read[cell] + ")" + "えきにいるよ！", 310, (float) (badgeSize * 2.5), paint);
+            canvas.drawText("つぎのえきまでもう少しだ！",310,badgeSize*3,paint);
+            canvas.drawText("東京えきまで"+String.valueOf(station.length-cell)+"えき！つぎもがんばろう！",310,(float)(badgeSize*3.5),paint);
+        }
+        else {
+            start = false;
+            canvas.drawBitmap(badgeOriginal[cell],0,badgeSize*2,paint);
+            canvas.drawText(station[cell] + "(" + station_read[cell] + ")" + "えきについた！", 310, (float) (badgeSize * 2.5), paint);
+            canvas.drawText(badgeName[cell]+"をゲットした！",310,badgeSize*3,paint);
+            canvas.drawText("東京えきまで"+String.valueOf(station.length-cell)+"えき！つぎもがんばろう！",310,(float)(badgeSize*3.5),paint);
+        }
+        paint.setAntiAlias(false);
+
         if(!start && cell == station.length-1 && offset >= distance){
             paint.setColor(Color.argb(190, 255, 255, 255));
             canvas.drawRect(500, 500, getWidth() - 100, getHeight() - 100, paint);
@@ -238,15 +266,6 @@ public class GameView extends View {
             canvas.drawText("これからもがんばろう！",580,800,paint);
             paint.setAntiAlias(false);
         }
-
-        RectF log = new RectF(0, 0, width, 265);
-        log.offset(0, badgeSize*2);
-        paint.setColor(Color.argb(190, 255, 255, 255));
-        canvas.drawRect(log, paint);
-        paint.setColor(Color.argb(190, 0, 0, 0));
-        paint.setTextSize(45);
-        paint.setAntiAlias(true);
-        paint.setAntiAlias(false);
 
         RectF back = new RectF(0, 0, 350, 150);
         back.offset(0, getHeight()-150);
@@ -267,8 +286,7 @@ public class GameView extends View {
                 break;
             case MotionEvent.ACTION_UP:
 
-                if(event.getX() >= 0 && event.getX() <= 300 && event.getY() >= 240 && event.getY() <= 340) {
-                    back = true;
+                if(event.getX() >= 0 && event.getX() <= 350 && event.getY() >= getHeight()-150 && event.getY() <= getHeight()) {
                     Log.d("back","touched!");
                     ((Activity)pContext).finish(); //Context経由でActivityを終了
                 }
