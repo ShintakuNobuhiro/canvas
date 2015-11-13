@@ -119,9 +119,6 @@ public class GameView extends View {
         int width = canvas.getWidth();
         int distance = cell * (width / imageCell);
 
-
-
-
         //始点背景処理
         canvas.drawBitmap(bgImageStart, -width - offset, 0, null);
         //繰り返し背景描画処理
@@ -280,12 +277,10 @@ public class GameView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
         switch(event.getAction()){
             case MotionEvent.ACTION_DOWN:
                 break;
             case MotionEvent.ACTION_UP:
-
                 if(event.getX() >= 0 && event.getX() <= 350 && event.getY() >= getHeight()-150 && event.getY() <= getHeight()) {
                     Log.d("back","touched!");
                     ((Activity)pContext).finish(); //Context経由でActivityを終了
@@ -299,10 +294,6 @@ public class GameView extends View {
             case MotionEvent.ACTION_MOVE:
                 break;
         }
-
         return true;
     }
-
-
-
 }
