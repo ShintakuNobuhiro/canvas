@@ -155,16 +155,14 @@ public class GameView extends View {
             else if (frameIndex % (trainFrame * 2) == trainFrame)
                 trainY += 5;
         }
-        canvas.drawBitmap(train,20-offset_int,trainY,null); //電車描画
+        canvas.drawBitmap(train, 20 - offset_int, trainY, null); //電車描画
 
         RectF log = new RectF(0, 0, width, 265);
-        log.offset(0, badgeSize*2);
-        paint.setColor(Color.argb(190, 255, 255, 255));
+        log.offset(0, badgeSize * 2);
+        paint.setColor(Color.parseColor("#BBDEFB"));
         canvas.drawRect(log, paint);
         paint.setColor(Color.argb(190, 0, 0, 0));
         paint.setTextSize(45);
-        paint.setAntiAlias(true);
-        paint.setAntiAlias(false);
 
         //バッジ描画
         RectF rect = new RectF(0,0,getWidth(),badgeSize*2);
@@ -218,10 +216,18 @@ public class GameView extends View {
                         offset += speed;
                         stopFrame = frameIndex;
                     }
-                    else if (frameIndex - stopFrame >= 300) {
+                    else if (frameIndex - stopFrame >= 270) {
                         startFrame = frameIndex;
                     }
                     else {
+                        rect = new RectF(0, 0, 200, 200);
+                        rect.offset(920,-360);
+                        canvas.save();
+                        canvas.rotate(45);
+                        paint.setColor(Color.parseColor("#BBDEFB"));
+                        canvas.drawRect(rect, paint);
+                        canvas.restore();
+                        paint.setColor(Color.parseColor("#000000"));
                         String name = "";
                         int t = -1;
                         for(int i=recent_cell;i<=cell;i++){
@@ -231,8 +237,8 @@ public class GameView extends View {
                             }
                         }
                         canvas.drawBitmap(badgeOriginal[t], 0, badgeSize * 2, paint);
-                        canvas.drawText(name,310, (float)(badgeSize*2.5),paint);
-                        canvas.drawText(badgeName[t]+"をゲットした！",310,badgeSize*3,paint);
+                        canvas.drawText(name, 310, (float) (badgeSize * 2.5), paint);
+                        canvas.drawText(badgeName[t] + "をゲットした！", 310, badgeSize * 3, paint);
                     }
                 } else {
                     offset += speed;
@@ -240,16 +246,37 @@ public class GameView extends View {
                 }
             }
         } else if(recent_cell == cell) {
+            rect = new RectF(0, 0, 200, 200);
+            rect.offset(920,-360);
+            canvas.save();
+            canvas.rotate(45);
+            paint.setColor(Color.parseColor("#BBDEFB"));
+            canvas.drawRect(rect, paint);
+            canvas.restore();
+            paint.setColor(Color.parseColor("#000000"));
             canvas.drawText(station[cell] + "(" + station_read[cell] + ")" + "えきにいるよ！", 310, (float) (badgeSize * 2.5), paint);
             canvas.drawText("つぎのえきまでもう少しだ！",310,badgeSize*3,paint);
             canvas.drawText("東京えきまで"+String.valueOf(station.length-cell)+"えき！つぎもがんばろう！",310,(float)(badgeSize*3.5),paint);
         }
         else {
             start = false;
-            canvas.drawBitmap(badgeOriginal[cell],0,badgeSize*2,paint);
+            rect = new RectF(0, 0, 200, 200);
+            rect.offset(920,-360);
+            canvas.save();
+            canvas.rotate(45);
+            paint.setColor(Color.parseColor("#BBDEFB"));
+            canvas.drawRect(rect, paint);
+            canvas.restore();
+            paint.setColor(Color.parseColor("#000000"));
+            canvas.drawBitmap(badgeOriginal[cell], 0, badgeSize * 2, paint);
             canvas.drawText(station[cell] + "(" + station_read[cell] + ")" + "えきについた！", 310, (float) (badgeSize * 2.5), paint);
             canvas.drawText(badgeName[cell]+"をゲットした！",310,badgeSize*3,paint);
-            canvas.drawText("東京えきまで"+String.valueOf(station.length-cell)+"えき！つぎもがんばろう！",310,(float)(badgeSize*3.5),paint);
+            paint.setColor(Color.argb(255, 255, 0, 0));
+            if(frameIndex-stopFrame >= 40)
+                if(cell == station.length-1)
+                    canvas.drawText("東京えきにとうちゃく！おめでとう",310,(float)(badgeSize*3.5),paint);
+                else
+                    canvas.drawText("東京えきまで"+String.valueOf(station.length-cell)+"えき！つぎもがんばろう！",310,(float)(badgeSize*3.5),paint);
         }
         paint.setAntiAlias(false);
 
